@@ -1,10 +1,15 @@
+/**
+Redo will NOT work without custom handlers!
+
+**/
+
 function UndoManager(maxStackSize){
 
     var stack = [];
     var cursor = 0;
     var handlers = {};
     
-    maxStackSize = (maxStackSize === undefined) ? 5 : maxStackSize;
+    maxStackSize = (maxStackSize === undefined) ? 20 : maxStackSize;
 
     this.addHandler = function(type, handler){
         handlers[type] = handler;
@@ -40,26 +45,29 @@ function UndoManager(maxStackSize){
         }
 
         var state = stack.splice(cursor, 1)[0];
-        var handler = handlers[state.type];
-
-        if(!handler)
-            throw "Undo handler type does not exist!";
+        var handler = handlers[state.type] || empty;
 
         stack.splice(cursor, 0, handler(state.data, cursor));
+
+        return state;
         
     };
+    
+    function empty(){};
 
     this.redo = function(){
+        
         if(stack.length < 1 || (cursor + 1) > stack.length)
             return;
-        var state = stack.splice(cursor, 1)[0];
-        var handler = handlers[state.type];
-
-        if(!handler)
-            throw "Undo handler type does not exist!";
         
+        var state = stack.splice(cursor, 1)[0];
+        var handler = handlers[state.type] || empty;
+
         stack.splice(cursor, 0, handler(state.data, cursor));
         ++cursor;  
+        
+        return state;
+        
     };
 
     this.clear = function(){
