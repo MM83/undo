@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <style></style>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw=" crossorigin="anonymous"></script>
+        <script src="CK_UndoModel.js"></script>
+        <style>
+            body {
+                font-family: Helvetica, Arial, sans-serif;
+            }
+            .ur-btn {
+                width: 80px;
+                padding: 10px;
+                margin-right: 10px;
+                border-radius: 10px;
+                background: #c46565;
+                color: white;
+                text-align: center;
+                cursor: default ;
+                float: left;
+            }
+            
+            #blue-box {
+                width: 80px;
+                height: 80px;
+                border-radius: 20px;
+                background: #506ba7;
+                position: relative;
+                top: 120px;
+            }
+            
+        </style>
+        <script>
+         
+            
+            $(function(){
+            
+                var $box = $("#blue-box");
+                $box.draggable();
+                
+                var undo = new UndoManager();
+            
+                //Set up the undo state handler. It only needs one, which deals with
+                //css styling:
+                
+                undo.addHandler("styling", function(data, index){
+                    var inverse = {
+                        type : "styling", 
+                        data : {
+                            left : $box.css("left"),
+                            top  : $box.css("top")
+                        }
+                    };
+                    $box.css(data);//Update state
+                    return inverse;//Return previous state for redo
+                });
+                
+                
+                $box.bind("mousedown", function(){
+                    undo.addState("styling", {
+                        top  : $box.css("top"),
+                        left : $box.css("left") 
+                    });
+                });
+                
+                $("#u-btn").bind("click", function(){
+                    undo.undo();
+                });
+                
+                $("#r-btn").bind("click", function(){
+                    undo.redo();
+                });
+            
+            });
+            
+        </script>
+    </head>
+    <body>
+        <div style="padding: 20px;"> Drag the blue box around the page, use the buttons
+        below or left/right cursors to undo/redo.</div>
+        <span id="u-btn" class="ur-btn">UNDO</span>
+        <span id="r-btn" class="ur-btn">REDO</span>
+        <div id="blue-box"></div>
+    </body>
+</html>
